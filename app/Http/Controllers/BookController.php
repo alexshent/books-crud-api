@@ -6,6 +6,7 @@ use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Services\BookService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,12 @@ use Illuminate\Http\UploadedFile;
 
 class BookController extends Controller
 {
+    public function __construct(
+        private BookService $bookService,
+    )
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -52,7 +59,7 @@ class BookController extends Controller
         }
 
         $book = new Book();
-        $book->storeNew($title, $coverFile, $genres);
+        $this->bookService->storeNew($book, $title, $coverFile, $genres);
 
         return redirect()->route('book.index')->with('success', 'Book created successfully.');
     }
@@ -81,7 +88,7 @@ class BookController extends Controller
     public function update(UpdateBookRequest $request, Book $book)
     {
         $data = $request->validated();
-        $book->updateExisting($data['title'], $data['status'], $data['cover_url'], $data['genres']);
+        $this->bookService->updateExisting($book, $data['title'], $data['status'], $data['cover_url'], $data['genres']);
 
         return redirect()->route('book.index')->with('success', 'Book updated successfully.');
     }
